@@ -1,29 +1,39 @@
 // backend/server.js
-require('dotenv').config();                // load .env into process.env
-const express = require('express');        // express framework
-const mongoose = require('mongoose');      // mongo ORM
-const morgan = require('morgan');          // request logger
-const cors = require('cors');              // enable CORS
-const authRoutes = require('./routes/auth');
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const morgan = require('morgan');
+const cors = require('cors');
 
+// 1️⃣ initialize app first
+const app = express();
+
+// 2️⃣ middlewares
+app.use(express.json());
+app.use(cors());
+app.use(morgan('dev'));
+
+// 3️⃣ import routes (paths must be correct)
+const authRoutes = require('./routes/auth');
 const apptRoutes = require('./routes/appointments');
 const presRoutes = require('./routes/prescriptions');
 
+// 4️⃣ use routes
+app.use('/api/auth', authRoutes);
 app.use('/api/appointments', apptRoutes);
 app.use('/api/prescriptions', presRoutes);
 
-const app = express();
-app.use(express.json());                   // parse JSON bodies
-app.use(cors());                           // allow cross-origin requests
-app.use(morgan('dev'));                    // log requests to console
+// 5️⃣ default route
+app.get('/', (_, res) => res.send('HCMS2 API running'));
 
-// connect to MongoDB using env var MONGO_URI
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser:true, useUnifiedTopology:true })
-  .then(()=> console.log('MongoDB connected'))
+// 6️⃣ connect MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+  .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('Mongo error:', err));
 
-app.use('/api/auth', authRoutes);          // mount auth endpoints
-
-app.get('/', (_,res) => res.send('HCMS2 API running'));
+// 7️⃣ start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, ()=> console.log(`Server listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
