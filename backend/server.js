@@ -5,28 +5,48 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 
-// 1️⃣ initialize app first
+// ✅ Import email utility
+const sendEmail = require('./utils/emailService');
+
+// 1️⃣ Initialize app
 const app = express();
 
-// 2️⃣ middlewares
+// 2️⃣ Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
 
-// 3️⃣ import routes (paths must be correct)
+// 3️⃣ Import routes
 const authRoutes = require('./routes/auth');
 const apptRoutes = require('./routes/appointments');
 const presRoutes = require('./routes/prescriptions');
 
-// 4️⃣ use routes
+require('./utils/scheduler');
+
+// 4️⃣ Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', apptRoutes);
 app.use('/api/prescriptions', presRoutes);
 
-// 5️⃣ default route
+// 5️⃣ Default route
 app.get('/', (_, res) => res.send('HCMS2 API running'));
 
-// 6️⃣ connect MongoDB
+// ✅ 6️⃣ Test email route
+app.get('/test-email', async (req, res) => {
+  try {
+    await sendEmail(
+      process.env.EMAIL_USER, // it will send the test mail to yourself
+      'Test Email from HCMS2.0',
+      'If you received this, your email setup works correctly!'
+    );
+    res.send('✅ Test email sent successfully!');
+  } catch (err) {
+    console.error('❌ Error sending test email:', err);
+    res.status(500).send('❌ Failed to send test email.');
+  }
+});
+
+// 7️⃣ Connect MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -34,6 +54,6 @@ mongoose.connect(process.env.MONGO_URI, {
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('Mongo error:', err));
 
-// 7️⃣ start server
+// 8️⃣ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
