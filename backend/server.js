@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 
+
 // ✅ Import email utility
 const sendEmail = require('./utils/emailService');
 
@@ -20,6 +21,7 @@ app.use(morgan('dev'));
 const authRoutes = require('./routes/auth');
 const apptRoutes = require('./routes/appointments');
 const presRoutes = require('./routes/prescriptions');
+const doctorRoutes = require('./routes/doctor');
 
 require('./utils/scheduler');
 
@@ -27,6 +29,9 @@ require('./utils/scheduler');
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', apptRoutes);
 app.use('/api/prescriptions', presRoutes);
+app.use('/api/doctor', doctorRoutes);
+
+
 
 // 5️⃣ Default route
 app.get('/', (_, res) => res.send('HCMS2 API running'));
