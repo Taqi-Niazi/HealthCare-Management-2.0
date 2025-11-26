@@ -25,13 +25,17 @@ export default function Login() {
       toast.success("Login successful!");
 
       // Redirect based on role
-      navigate(
-        res.data.user.role === "doctor"
-          ? "/doctor/dashboard"
-          : "/patient/dashboard"
-      );
+      if (res.data.user.role === "doctor") {
+        navigate("/doctor/dashboard");
+      } else if (res.data.user.role === "patient") {
+        navigate("/patient/dashboard");
+      } else if (res.data.user.role === "admin") {
+        navigate("/admin/dashboard"); // <-- Add this
+      } else {
+        navigate("/"); // fallback (if no role)
+      }
     } catch (err) {
-      toast.error(err.response?.data?.error || "Invalid credentials.");
+      toast.error(err.response?.data?.error || "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,10 @@ export default function Login() {
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="card shadow p-4" style={{ maxWidth: "420px", width: "100%" }}>
+      <div
+        className="card shadow p-4"
+        style={{ maxWidth: "420px", width: "100%" }}
+      >
         <h3 className="text-center mb-4 text-primary">Login to HCMS 2.0</h3>
 
         <form onSubmit={handleLogin}>
@@ -71,7 +78,11 @@ export default function Login() {
 
           {/* Login Button */}
           <div className="d-grid">
-            <button className="btn btn-primary" type="submit" disabled={loading}>
+            <button
+              className="btn btn-primary"
+              type="submit"
+              disabled={loading}
+            >
               {loading ? "Logging in..." : "Login"}
             </button>
           </div>

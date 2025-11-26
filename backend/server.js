@@ -1,13 +1,14 @@
-// backend/server.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
 
-
 // ✅ Import email utility
 const sendEmail = require('./utils/emailService');
+
+// ⬇️ NEW: Import Admin Creator Utility
+const createDefaultAdmin = require('./utils/createAdmin');
 
 // 1️⃣ Initialize app
 const app = express();
@@ -20,6 +21,7 @@ app.use(morgan('dev'));
 // 3️⃣ Import routes
 const authRoutes = require('./routes/auth');
 const apptRoutes = require('./routes/appointments');
+const adminRoutes = require("./routes/admin");
 const presRoutes = require('./routes/prescriptions');
 const doctorRoutes = require('./routes/doctor');
 
@@ -30,8 +32,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/appointments', apptRoutes);
 app.use('/api/prescriptions', presRoutes);
 app.use('/api/doctor', doctorRoutes);
-
-
+app.use("/api/admin", adminRoutes);
 
 // 5️⃣ Default route
 app.get('/', (_, res) => res.send('HCMS2 API running'));
@@ -40,7 +41,7 @@ app.get('/', (_, res) => res.send('HCMS2 API running'));
 app.get('/test-email', async (req, res) => {
   try {
     await sendEmail(
-      process.env.EMAIL_USER, // it will send the test mail to yourself
+      process.env.EMAIL_USER,
       'Test Email from HCMS2.0',
       'If you received this, your email setup works correctly!'
     );
@@ -52,12 +53,18 @@ app.get('/test-email', async (req, res) => {
 });
 
 // 7️⃣ Connect MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('Mongo error:', err));
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(async () => {
+    console.log('MongoDB connected');
+
+    // ⬇️ NEW: Auto-create default admin when DB connects
+    await createDefaultAdmin();
+  })
+  .catch((err) => console.error('Mongo error:', err));
 
 // 8️⃣ Start server
 const PORT = process.env.PORT || 5000;

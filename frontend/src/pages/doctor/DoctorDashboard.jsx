@@ -1,93 +1,100 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosInstance";
 import { toast } from "react-toastify";
-import DoctorSidebar from "../../components/DoctorSidebar";
+import DoctorLayout from "../../components/DoctorLayout";
 
 export default function DoctorDashboard() {
   const [doctor, setDoctor] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
-  const [stats, setStats] = useState(null);
-
-  const fetchDoctorData = async () => {
-    try {
-      const res = await api.get("/doctor/me");
-      setDoctor(res.data.doctor);
-      setAppointments(res.data.appointments || []);
-      setPrescriptions(res.data.prescriptions || []);
-      setStats(res.data.stats || {});
-    } catch (err) {
-      toast.error("Unable to load doctor dashboard.");
-    }
-  };
+  const [prescriptions, setPrescriptions] = useState([]); // <-- Add this
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    totalAppointments: 0,
+    totalPrescriptions: 0,
+  });
 
   useEffect(() => {
+    const fetchDoctorData = async () => {
+      try {
+        const res = await api.get("/doctor/me");
+        setDoctor(res.data.doctor);
+        setAppointments(res.data.appointments || []);
+        setPrescriptions(res.data.prescriptions || []); // <-- Store prescriptions
+        setStats(res.data.stats || {});
+      } catch (err) {
+        toast.error("Unable to load doctor dashboard.");
+      }
+    };
     fetchDoctorData();
   }, []);
 
-  if (!doctor)
-    return <div className="text-center mt-5">Loading...</div>;
+  if (!doctor) return <div className="text-center mt-5">Loading...</div>;
 
   return (
-    <div className="d-flex">
-      {/* Sidebar */}
-      <DoctorSidebar />
+    <DoctorLayout>
+      <div className="content-inner">
+        <div className="dashboard-container">
 
-      {/* Main content */}
-      <div className="flex-grow-1 ms-md-5 ps-md-4 container py-4">
-        <h2 className="text-primary mb-3">Welcome Dr. {doctor.name}</h2>
+          <h2 className="dashboard-title">Welcome Dr. {doctor.name}</h2>
 
-        {/* Stats Cards */}
-        <div className="row g-3 mb-4">
-          <div className="col-12 col-md-4">
-            <div className="card p-3 shadow-sm text-center">
-              <h6>Total Patients</h6>
-              <h3>{stats.totalPatients}</h3>
-            </div>
+          {/* Stats Section */}
+          <div className="stats-row">
+            <StatCard title="Total Patients" value={stats.totalPatients} />
+            <StatCard title="Total Appointments" value={stats.totalAppointments} />
+            <StatCard title="Total Prescriptions" value={stats.totalPrescriptions} />
           </div>
-          <div className="col-12 col-md-4">
-            <div className="card p-3 shadow-sm text-center">
-              <h6>Total Appointments</h6>
-              <h3>{stats.totalAppointments}</h3>
+
+          {/* Recent Prescriptions Section */}
+          <div className="section-title mt-4">Recent Prescriptions</div>
+
+          {prescriptions.length === 0 ? (
+            <div className="empty-msg">No prescriptions found.</div>
+          ) : (
+            <div className="card table-card shadow-sm">
+              <div className="table-responsive">
+                <table className="table table-hover table-bordered align-middle mb-0">
+                  <thead className="table-dark">
+                    <tr>
+                      <th>Patient</th>
+                      <th>Medications</th>
+                      <th>Date Issued</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {prescriptions.slice(0, 5).map((pres) => (
+                      <tr key={pres._id}>
+                        <td>{pres.patient?.name || "N/A"}</td>
+                        <td>
+                          {pres.medications?.map((m) => m.name).join(", ") ||
+                            "N/A"}
+                        </td>
+                        <td>{new Date(pres.issuedAt).toLocaleDateString()}</td>
+                        <td>
+                          <a
+                            href={`/prescription/${pres._id}`}
+                            className="btn btn-sm btn-primary"
+                          >
+                            View
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div className="col-12 col-md-4">
-            <div className="card p-3 shadow-sm text-center">
-              <h6>Total Prescriptions</h6>
-              <h3>{stats.totalPrescriptions}</h3>
-            </div>
-          </div>
+          )}
         </div>
-
-        {/* Recent Appointments */}
-        <h4 className="mt-3 mb-3">Recent Appointments</h4>
-        {appointments.length === 0 ? (
-          <p>No appointments found.</p>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped table-hover align-middle">
-              <thead className="table-dark">
-                <tr>
-                  <th>Patient</th>
-                  <th>Date & Time</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((appt) => (
-                  <tr key={appt._id}>
-                    <td>{appt.patient?.name || "N/A"}</td>
-                    <td>{new Date(appt.date).toLocaleString()}</td>
-                    <td>{appt.reason}</td>
-                    <td>{appt.status || "Scheduled"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
-    </div>
+    </DoctorLayout>
   );
 }
+
+// 📌 StatCard Component
+const StatCard = ({ title, value }) => (
+  <div className="stat-card shadow-sm text-center p-4 border-0 rounded-3">
+    <h6 className="text-muted mb-1">{title}</h6>
+    <h3 className="fw-bold">{value}</h3>
+  </div>
+);

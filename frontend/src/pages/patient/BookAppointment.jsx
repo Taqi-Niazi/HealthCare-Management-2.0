@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosInstance";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function BookAppointment() {
   const [doctors, setDoctors] = useState([]);
@@ -11,21 +13,26 @@ export default function BookAppointment() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const fetchDoctors = async () => {
-    try {
-      const res = await api.get("/doctor/all"); // Backend route to fetch doctors
-      setDoctors(res.data.doctors || []);
-    } catch (err) {
-      toast.error("Failed to load doctors");
-    }
-  };
-
   useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await api.get("/doctor/all");
+        setDoctors(res.data.doctors || []);
+      } catch (err) {
+        toast.error("Failed to load doctors");
+      }
+    };
     fetchDoctors();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!doctor || !date || !reason.trim()) {
+      toast.warning("Please fill all fields correctly");
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post("/appointments", { doctor, date, reason });
@@ -40,55 +47,79 @@ export default function BookAppointment() {
 
   return (
     <div className="container py-4">
+      {/* 🔹 Navigation Buttons */}
+      <div className="d-flex justify-content-end gap-2 mb-3">
+        <Link to="/patient/dashboard" className="btn btn-outline-secondary">
+          ← Dashboard
+        </Link>
+        <Link to="/patient/appointments" className="btn btn-outline-primary">
+          My Appointments
+        </Link>
+      </div>
+
       <div className="card shadow p-4 mx-auto" style={{ maxWidth: "600px" }}>
         <h2 className="text-primary mb-3 text-center">Book Appointment</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label fw-bold">Select Doctor</label>
-            <select
-              className="form-select"
-              value={doctor}
-              onChange={(e) => setDoctor(e.target.value)}
-              required
-            >
-              <option value="">-- Choose Doctor --</option>
-              {doctors.map((d) => (
-                <option key={d._id} value={d._id}>
-                  Dr. {d.name}
-                </option>
-              ))}
-            </select>
+        {doctors.length === 0 ? (
+          <div className="alert alert-warning text-center">
+            No doctors available at the moment. Please try again later.
           </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            {/* Doctor Selection */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Select Doctor</label>
+              <select
+                className="form-select"
+                value={doctor}
+                onChange={(e) => setDoctor(e.target.value)}
+                required
+              >
+                <option value="">-- Choose Doctor --</option>
+                {doctors.map((d) => (
+                  <option key={d._id} value={d._id}>
+                    Dr. {d.name.replace(/^Dr\.\s*/, "")}{" "}
+                    {d.specialization ? `(${d.specialization})` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label fw-bold">Date & Time</label>
-            <input
-              type="datetime-local"
-              className="form-control"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </div>
+            {/* Date and Time */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Date & Time</label>
+              <DatePicker
+                selected={date}
+                onChange={(newDate) => setDate(newDate)}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={30}
+                dateFormat="dd-MM-yyyy HH:mm"
+                className="form-control"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label fw-bold">Reason for Visit</label>
-            <textarea
-              className="form-control"
-              rows="2"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              required
-            ></textarea>
-          </div>
+            {/* Reason */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Reason for Visit</label>
+              <textarea
+                className="form-control"
+                rows="2"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Describe your symptoms or concerns"
+                required
+              ></textarea>
+            </div>
 
-          <div className="text-center">
-            <button className="btn btn-success" disabled={loading}>
-              {loading ? "Booking..." : "Book Appointment"}
-            </button>
-          </div>
-        </form>
+            {/* Submit Button */}
+            <div className="text-center">
+              <button className="btn btn-success px-4" disabled={loading}>
+                {loading ? "Booking..." : "Book Appointment"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

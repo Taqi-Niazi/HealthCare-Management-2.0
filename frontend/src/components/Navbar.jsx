@@ -119,14 +119,19 @@ export default function Navbar() {
           {user?.role === "admin" && (
             <>
               <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/admin/dashboard">
-                  Admin Panel
-                </NavLink>
+                <Link className="nav-link" to="/admin/dashboard">
+                  Admin Dashboard
+                </Link>
               </li>
               <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/admin/users">
-                  Manage Users
-                </NavLink>
+                <Link className="nav-link" to="/admin/manage-doctors">
+                  Manage Doctors
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin/create-doctor">
+                  Create Doctor
+                </Link>
               </li>
             </>
           )}

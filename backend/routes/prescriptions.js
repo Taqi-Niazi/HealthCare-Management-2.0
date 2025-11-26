@@ -34,8 +34,9 @@ router.post("/", authMiddleware, async (req, res) => {
 
     const newPrescription = new Prescription({
       patient,
-      doctor,
+      doctor: req.user.id,
       medications,
+      issuedAt: new Date(),
     });
 
     await newPrescription.save();

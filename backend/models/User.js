@@ -1,11 +1,27 @@
 // backend/models/User.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },           // user's full name
-  email: { type: String, required: true, unique: true }, // unique email
-  password: { type: String, required: true },       // hashed password
-  role: { type: String, enum: ['patient','doctor','admin'], default: 'patient' }
-}, { timestamps: true });                            // createdAt/updatedAt
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ["patient", "doctor", "admin"],
+      default: "patient",
+    },
+    specialization: { type: String }, // allow for doctors
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('User', userSchema); // export model
+// 🔐 Hash password only when it's new or modified
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // prevent double hashing
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+module.exports = mongoose.model("User", userSchema);

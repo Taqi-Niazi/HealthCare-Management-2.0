@@ -1,15 +1,14 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import CreateDoctor from "./pages/admin/CreateDoctor";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageDoctors from "./pages/admin/ManageDoctors";
 import PrescriptionView from "./pages/PrescriptionView";
 import NotFound from "./pages/NotFound";
-import Footer from "./components/Footer";
 import Prescriptions from "./pages/doctor/Prescriptions";
+
 
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
@@ -73,8 +72,13 @@ function App() {
 
           {/* Catch-all Route */}
           <Route path="*" element={<NotFound />} />
+          {/* Admin Protected Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/manage-doctors" element={<ManageDoctors />} />
+            <Route path="/admin/create-doctor" element={<CreateDoctor />} />
+          </Route>
         </Routes>
-        <Footer />
       </div>
     </Router>
   );

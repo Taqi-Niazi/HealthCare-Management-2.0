@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axiosInstance";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 export default function PatientAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -20,7 +21,8 @@ export default function PatientAppointments() {
   };
 
   const deleteAppointment = async (id) => {
-    if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
+    if (!window.confirm("Are you sure you want to cancel this appointment?"))
+      return;
 
     try {
       await api.delete(`/appointments/${id}`);
@@ -35,15 +37,28 @@ export default function PatientAppointments() {
     fetchAppointments();
   }, []);
 
-  if (loading) return <div className="container mt-4 text-center">Loading...</div>;
-  if (error) return <div className="container mt-4 text-danger text-center">{error}</div>;
+  if (loading)
+    return <div className="container mt-4 text-center">Loading...</div>;
+  if (error)
+    return (
+      <div className="container mt-4 text-danger text-center">{error}</div>
+    );
 
-  const upcoming = appointments.filter(a => new Date(a.date) >= new Date());
-  const past = appointments.filter(a => new Date(a.date) < new Date());
+  const upcoming = appointments.filter((a) => new Date(a.date) >= new Date());
+  const past = appointments.filter((a) => new Date(a.date) < new Date());
 
   return (
     <div className="container py-4">
       <h2 className="text-success mb-4 text-center">My Appointments</h2>
+
+      <div className="d-flex justify-content-end gap-2 mb-3">
+        <Link to="/patient/dashboard" className="btn btn-outline-secondary">
+          ← Dashboard
+        </Link>
+        <Link to="/patient/book-appointment" className="btn btn-success">
+          + Book Appointment
+        </Link>
+      </div>
 
       {/* Upcoming Appointments */}
       <section className="mb-5">
@@ -65,7 +80,7 @@ export default function PatientAppointments() {
               <tbody>
                 {upcoming.map((appt) => (
                   <tr key={appt._id}>
-                    <td>{appt.doctor?.name || "N/A"}</td>
+                    <td>{appt.doctor?.name || appt.doctorName || "N/A"}</td>
                     <td>{new Date(appt.date).toLocaleString()}</td>
                     <td style={{ whiteSpace: "normal", maxWidth: "200px" }}>
                       {appt.reason}
