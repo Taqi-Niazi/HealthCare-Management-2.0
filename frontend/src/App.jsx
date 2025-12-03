@@ -9,7 +9,6 @@ import PrescriptionView from "./pages/PrescriptionView";
 import NotFound from "./pages/NotFound";
 import Prescriptions from "./pages/doctor/Prescriptions";
 
-
 // Doctor Pages
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import Appointments from "./pages/doctor/Appointments";
@@ -23,10 +22,12 @@ import BookAppointment from "./pages/patient/BookAppointment";
 
 import QRCodeScanner from "./pages/QRCodeScanner";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/Footer";
 
 function App() {
   return (
     <Router>
+      {/* Layout wrapper */}
       <div className="d-flex flex-column min-vh-100">
         <Routes>
           {/* Public Routes */}
@@ -64,21 +65,22 @@ function App() {
           </Route>
 
           {/* Shared (Doctor + Patient) */}
-          <Route
-            element={<ProtectedRoute allowedRoles={["doctor", "patient"]} />}
+          <Route element={<ProtectedRoute allowedRoles={["doctor", "patient"]} />}
           >
             <Route path="/scan-prescription" element={<QRCodeScanner />} />
           </Route>
 
-          {/* Catch-all Route */}
-          <Route path="*" element={<NotFound />} />
           {/* Admin Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/manage-doctors" element={<ManageDoctors />} />
             <Route path="/admin/create-doctor" element={<CreateDoctor />} />
           </Route>
+
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer />
       </div>
     </Router>
   );

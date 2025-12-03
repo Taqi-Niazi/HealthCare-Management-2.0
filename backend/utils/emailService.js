@@ -15,7 +15,7 @@ async function sendEmail(to, subject, text) {
       from: `"HCMS2 Notifications" <${process.env.EMAIL_USER}>`,
       to,
       subject,
-      html,
+      html:text,
     });
     console.log('✅ Email sent:', info.response);
   } catch (err) {

@@ -19,6 +19,7 @@ export default function Login() {
 
       // Store token and user details
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("role", res.data.user.role);
       localStorage.setItem("userId", res.data.user.id);
 

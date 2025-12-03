@@ -1,3 +1,4 @@
+// frontend/src/pages/doctor/CreatePrescription.jsx
 import { useState, useEffect } from "react";
 import api from "../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -5,55 +6,51 @@ import { toast } from "react-toastify";
 import DoctorSidebar from "../../components/DoctorSidebar";
 
 export default function CreatePrescription() {
-  const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState("");
+  const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState("");
   const [medications, setMedications] = useState([{ name: "", dosage: "" }]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch patients assigned to doctor
-  const fetchPatients = async () => {
+  // 🔹 Fetch doctor's appointments with patients
+  const fetchAppointments = async () => {
     try {
-      const res = await api.get("/doctor/patients");
-      setPatients(res.data.patients || res.data || []);
+      const res = await api.get("/appointments");
+      setAppointments(res.data || []);
     } catch (err) {
-      toast.error("Error fetching patients");
+      toast.error("Error fetching appointments");
     }
   };
 
   useEffect(() => {
-    fetchPatients();
+    fetchAppointments();
   }, []);
 
-  // Handle Medication Inputs
+  // 🔹 Fix: This lets you type in input fields
   const handleMedicationChange = (index, field, value) => {
-    const newMeds = [...medications];
-    newMeds[index][field] = value;
-    setMedications(newMeds);
+    const updatedMeds = [...medications];
+    updatedMeds[index][field] = value;
+    setMedications(updatedMeds);
   };
 
-  const addMedication = () => {
-    setMedications([...medications, { name: "", dosage: "" }]);
-  };
-
+  // 🔹 Fix: Remove medicine row
   const removeMedication = (index) => {
     setMedications(medications.filter((_, i) => i !== index));
   };
 
-  // Handle Submit
+  // 🔹 Submit Prescription
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedPatient || medications.length === 0) {
-      toast.warning("Please select a patient and add at least one medication.");
+    if (!selectedAppointment || medications.length === 0) {
+      toast.warning("Select an appointment and add at least one medicine.");
       return;
     }
 
     try {
       setLoading(true);
       await api.post("/prescriptions", {
-        patient: selectedPatient,
-        doctor: "self",
+        appointmentId: selectedAppointment,
         medications,
         notes,
       });
@@ -69,38 +66,36 @@ export default function CreatePrescription() {
 
   return (
     <div className="d-flex">
-      {/* Sidebar */}
       <DoctorSidebar />
 
-      {/* Main Content */}
-      <div className="flex-grow-1 ms-md-5 ps-md-4 container py-4">
+      <div className="flex-grow-1 container py-4">
         <div className="card shadow p-4 mx-auto" style={{ maxWidth: "720px" }}>
           <h2 className="text-primary mb-4 text-center">Create Prescription</h2>
 
           <form onSubmit={handleSubmit}>
-            {/* Select Patient */}
+            {/* 🔹 Select Appointment */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Select Patient</label>
+              <label className="form-label fw-bold">Select Appointment</label>
               <select
                 className="form-select"
-                value={selectedPatient}
-                onChange={(e) => setSelectedPatient(e.target.value)}
-                required
-              >
-                <option value="">-- Choose Patient --</option>
-                {patients.map((p) => (
-                  <option key={p._id} value={p._id}>
-                    {p.name} ({p.email})
+                value={selectedAppointment}
+                onChange={(e) => setSelectedAppointment(e.target.value)}
+                required>
+                <option value="">-- Choose Appointment --</option>
+                {appointments.map((appt) => (
+                  <option key={appt._id} value={appt._id}>
+                    {appt.patient?.name} —{" "}
+                    {new Date(appt.date).toLocaleString()}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Medications Section */}
+            {/* 🔹 Medications */}
             <div className="mb-2 fw-bold">Medications</div>
             {medications.map((med, index) => (
               <div key={index} className="row g-2 mb-2">
-                <div className="col-12 col-md-5">
+                <div className="col-5">
                   <input
                     type="text"
                     className="form-control"
@@ -112,7 +107,7 @@ export default function CreatePrescription() {
                     required
                   />
                 </div>
-                <div className="col-12 col-md-5">
+                <div className="col-5">
                   <input
                     type="text"
                     className="form-control"
@@ -124,47 +119,41 @@ export default function CreatePrescription() {
                     required
                   />
                 </div>
-                <div className="col-12 col-md-2 d-flex">
+                <div className="col-2 d-flex">
                   {index > 0 && (
                     <button
                       type="button"
                       className="btn btn-danger btn-sm w-100"
-                      onClick={() => removeMedication(index)}
-                    >
-                      Remove
+                      onClick={() => removeMedication(index)}>
+                      X
                     </button>
                   )}
                 </div>
               </div>
             ))}
 
+            {/* 🔹 Add Medicine */}
             <button
               type="button"
               className="btn btn-outline-primary btn-sm mb-3"
-              onClick={addMedication}
-            >
-              + Add Another Medicine
+              onClick={() =>
+                setMedications([...medications, { name: "", dosage: "" }])
+              }>
+              + Add Medicine
             </button>
 
-            {/* Notes */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Doctor Notes</label>
-              <textarea
-                className="form-control"
-                rows="3"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional notes or instructions"
-              ></textarea>
-            </div>
+            {/* 🔹 Notes */}
+            <textarea
+              className="form-control mb-3"
+              rows="3"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Optional Doctor Notes"
+            />
 
-            {/* Submit Button */}
+            {/* 🔹 Submit */}
             <div className="text-center">
-              <button
-                className="btn btn-success px-4"
-                disabled={loading}
-                type="submit"
-              >
+              <button className="btn btn-success px-4" disabled={loading}>
                 {loading ? "Creating..." : "Create Prescription"}
               </button>
             </div>

@@ -25,25 +25,31 @@ export default function BookAppointment() {
     fetchDoctors();
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!doctor || !date || !reason.trim()) {
-      toast.warning("Please fill all fields correctly");
-      return;
-    }
+  if (!doctor || !date || !reason.trim()) {
+    toast.warning("Please fill all fields correctly");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await api.post("/appointments", { doctor, date, reason });
-      toast.success("Appointment booked successfully!");
-      navigate("/patient/appointments");
-    } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to book appointment");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    await api.post("/appointments", {
+      doctor,
+      date: new Date(date).toISOString(),   // ✅ Fix here
+      reason,
+    });
+
+    toast.success("Appointment booked successfully!");
+    navigate("/patient/appointments");
+  } catch (err) {
+    toast.error(err.response?.data?.error || "Failed to book appointment");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="container py-4">
@@ -57,8 +63,14 @@ export default function BookAppointment() {
         </Link>
       </div>
 
-      <div className="card shadow p-4 mx-auto" style={{ maxWidth: "600px" }}>
-        <h2 className="text-primary mb-3 text-center">Book Appointment</h2>
+      <div className="card shadow-lg p-4 mx-auto" style={{ maxWidth: "650px" }}>
+        <h2 className="text-primary mb-3 text-center fw-bold">
+          Book Appointment
+        </h2>
+        <p className="text-muted text-center mb-4">
+          Select your doctor, choose a date and time, and briefly mention your
+          reason for consultation.
+        </p>
 
         {doctors.length === 0 ? (
           <div className="alert alert-warning text-center">
@@ -78,8 +90,8 @@ export default function BookAppointment() {
                 <option value="">-- Choose Doctor --</option>
                 {doctors.map((d) => (
                   <option key={d._id} value={d._id}>
-                    Dr. {d.name.replace(/^Dr\.\s*/, "")}{" "}
-                    {d.specialization ? `(${d.specialization})` : ""}
+                    Dr. {d.name.replace(/^Dr\.\s*/, "")}
+                    {d.specialization ? ` — ${d.specialization}` : ""}
                   </option>
                 ))}
               </select>
@@ -87,35 +99,42 @@ export default function BookAppointment() {
 
             {/* Date and Time */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Date & Time</label>
+              <label className="form-label fw-bold me-3">Preferred Date & Time</label>
               <DatePicker
                 selected={date}
                 onChange={(newDate) => setDate(newDate)}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={30}
-                dateFormat="dd-MM-yyyy HH:mm"
+                dateFormat="dd MMM yyyy — hh:mm a"
+                placeholderText="Select appointment date and time"
+                minDate={new Date()}
                 className="form-control"
+                required
               />
             </div>
 
             {/* Reason */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Reason for Visit</label>
+              <label className="form-label fw-bold">Reason / Symptoms</label>
               <textarea
                 className="form-control"
-                rows="2"
+                rows="3"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Describe your symptoms or concerns"
+                placeholder="Briefly describe symptoms or reason (e.g. fever, pain, regular check-up)"
                 required
               ></textarea>
             </div>
 
             {/* Submit Button */}
             <div className="text-center">
-              <button className="btn btn-success px-4" disabled={loading}>
-                {loading ? "Booking..." : "Book Appointment"}
+              <button
+                className="btn btn-success px-4 fw-bold"
+                disabled={loading}
+                type="submit"
+              >
+                {loading ? "Booking..." : "Confirm Appointment"}
               </button>
             </div>
           </form>

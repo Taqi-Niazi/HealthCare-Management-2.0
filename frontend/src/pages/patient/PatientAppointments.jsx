@@ -49,52 +49,72 @@ export default function PatientAppointments() {
 
   return (
     <div className="container py-4">
-      <h2 className="text-success mb-4 text-center">My Appointments</h2>
+      <h2 className="text-success mb-4 text-center fw-bold">My Appointments</h2>
 
-      <div className="d-flex justify-content-end gap-2 mb-3">
+      {/* 🔹 Action Buttons */}
+      <div className="d-flex justify-content-end gap-2 mb-4">
         <Link to="/patient/dashboard" className="btn btn-outline-secondary">
           ← Dashboard
         </Link>
-        <Link to="/patient/book-appointment" className="btn btn-success">
+        <Link to="/patient/book-appointment" className="btn btn-success fw-bold">
           + Book Appointment
         </Link>
       </div>
 
-      {/* Upcoming Appointments */}
+      {/* 🔹 Upcoming Appointments */}
       <section className="mb-5">
-        <h4 className="text-primary">Upcoming Appointments</h4>
+        <h4 className="text-primary fw-semibold">Upcoming Appointments</h4>
         {upcoming.length === 0 ? (
-          <p>No upcoming appointments.</p>
+          <p className="text-muted">No upcoming appointments.</p>
         ) : (
           <div className="table-responsive">
-            <table className="table table-bordered table-striped table-hover align-middle">
+            <table className="table table-bordered table-hover align-middle">
               <thead className="table-dark">
                 <tr>
                   <th>Doctor</th>
                   <th>Date & Time</th>
                   <th>Reason</th>
                   <th>Status</th>
-                  <th style={{ minWidth: "110px" }}>Actions</th>
+                  <th style={{ minWidth: "130px" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {upcoming.map((appt) => (
                   <tr key={appt._id}>
-                    <td>{appt.doctor?.name || appt.doctorName || "N/A"}</td>
-                    <td>{new Date(appt.date).toLocaleString()}</td>
-                    <td style={{ whiteSpace: "normal", maxWidth: "200px" }}>
+                    <td>{appt.doctor?.name || "N/A"}</td>
+                    <td className="fw-semibold">
+                      {new Date(appt.date).toLocaleString("en-IN", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td style={{ whiteSpace: "normal", maxWidth: "260px" }}>
                       {appt.reason}
                     </td>
-                    <td>{appt.status || "Scheduled"}</td>
                     <td>
-                      <div className="d-flex flex-wrap gap-2 justify-content-center">
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => deleteAppointment(appt._id)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
+                      <span
+                        className={`badge ${
+                          appt.status === "scheduled"
+                            ? "bg-warning"
+                            : appt.status === "completed"
+                            ? "bg-success"
+                            : "bg-secondary"
+                        }`}
+                      >
+                        {appt.status || "Scheduled"}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => deleteAppointment(appt._id)}
+                      >
+                        Cancel
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -104,14 +124,14 @@ export default function PatientAppointments() {
         )}
       </section>
 
-      {/* Past Appointments */}
+      {/* 🔹 Past Appointments */}
       <section>
-        <h4 className="text-secondary">Past Appointments</h4>
+        <h4 className="text-secondary fw-semibold">Past Appointments</h4>
         {past.length === 0 ? (
-          <p>No past appointments.</p>
+          <p className="text-muted">No past appointments.</p>
         ) : (
           <div className="table-responsive">
-            <table className="table table-bordered table-striped table-hover align-middle">
+            <table className="table table-bordered table-hover align-middle">
               <thead className="table-dark">
                 <tr>
                   <th>Doctor</th>
@@ -124,11 +144,22 @@ export default function PatientAppointments() {
                 {past.map((appt) => (
                   <tr key={appt._id}>
                     <td>{appt.doctor?.name || "N/A"}</td>
-                    <td>{new Date(appt.date).toLocaleString()}</td>
-                    <td style={{ whiteSpace: "normal", maxWidth: "200px" }}>
+                    <td>
+                      {new Date(appt.date).toLocaleString("en-IN", {
+                        weekday: "short",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td style={{ whiteSpace: "normal", maxWidth: "260px" }}>
                       {appt.reason}
                     </td>
-                    <td>{appt.status || "Completed"}</td>
+                    <td>
+                      <span className="badge bg-success">Completed</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

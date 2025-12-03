@@ -1,28 +1,20 @@
+// frontend/src/components/DoctorLayout.jsx
 import { useState } from "react";
 import DoctorSidebar from "./DoctorSidebar";
 import Footer from "./Footer";
 
 export default function DoctorLayout({ children }) {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <div className="layout-wrapper">
-
-      <div className="layout-main">
-        <div className={`sidebar-wrapper ${isOpen ? "show" : ""}`}>
-          <DoctorSidebar />
-        </div>
-
-        {/* CONTENT */}
-        <div
-          className="content-wrapper"
-          onClick={() => isOpen && setIsOpen(false)}
-        >
-          {children}
-        </div>
+      <div className="sidebar-wrapper">
+        <DoctorSidebar />
       </div>
 
-      <Footer />
+      <div className="content-wrapper">
+        <div className="content-inner">{children}</div>
+      </div>
+
+      <Footer />   {/* Footer remains here, outside content-wrapper */}
     </div>
   );
 }

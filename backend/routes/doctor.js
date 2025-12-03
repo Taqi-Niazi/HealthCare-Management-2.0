@@ -6,8 +6,8 @@ const Appointment = require("../models/Appointment");
 const Prescription = require("../models/Prescription");
 const User = require("../models/User");
 
-// 📌 GET /api/doctor/me — Doctor Dashboard Data
-router.get("/me", authMiddleware, async (req, res) => {
+// GET /api/doctor/me — Doctor Dashboard Data
+router.get("/me", authMiddleware(["doctor"]), async (req, res) => {
   try {
     if (req.user.role !== "doctor") {
       return res.status(403).json({ error: "Access denied" });
@@ -19,9 +19,10 @@ router.get("/me", authMiddleware, async (req, res) => {
       .populate("patient", "name email")
       .sort({ date: -1 });
 
-    const prescriptions = await Prescription.find({ doctor: req.user.id })
+    const prescriptions = await Prescription.find({ issuedBy: req.user.id }) // ⬅ FIXED
       .populate("patient", "name email")
-      .populate("doctor", "name email")
+      .populate("issuedBy", "name email") // ⬅ FIXED
+      .populate("appointment") // Optional but correct
       .sort({ issuedAt: -1 });
 
     return res.json({
@@ -42,8 +43,8 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
-// 📌 FETCH PATIENTS ASSIGNED TO THIS DOCTOR
-router.get("/patients", authMiddleware, async (req, res) => {
+// FETCH PATIENTS ASSIGNED TO THIS DOCTOR
+router.get("/patients", authMiddleware(["doctor"]), async (req, res) => {
   try {
     if (req.user.role !== "doctor") {
       return res.status(403).json({ error: "Access denied" });
@@ -51,7 +52,7 @@ router.get("/patients", authMiddleware, async (req, res) => {
 
     const patients = await Appointment.find({ doctor: req.user.id })
       .populate("patient", "name email phone")
-      .populate("doctor", "name email")
+      .populate("issuedBy", "name email")
       .sort({ date: -1 });
 
     // Extract unique patient list
@@ -68,8 +69,8 @@ router.get("/patients", authMiddleware, async (req, res) => {
   }
 });
 
-// 📌 NEW: GET /api/doctor/all — Fetch all doctors (for patient to book appointment)
-router.get("/all", authMiddleware, async (req, res) => {
+// NEW: GET /api/doctor/all — Fetch all doctors (for patient to book appointment)
+router.get("/all", authMiddleware(["doctor", "patient"]), async (req, res) => {
   try {
     const doctors = await User.find({ role: "doctor" }).select(
       "_id name email specialization"

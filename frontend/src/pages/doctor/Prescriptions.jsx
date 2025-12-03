@@ -30,7 +30,9 @@ export default function Prescriptions() {
       setPrescriptions((prev) => prev.filter((p) => p._id !== id));
       toast.success("Prescription deleted.");
     } catch (err) {
-      toast.error(err.response?.data?.error || "Could not delete prescription.");
+      toast.error(
+        err.response?.data?.error || "Could not delete prescription."
+      );
     }
   };
 
@@ -71,27 +73,34 @@ export default function Prescriptions() {
               <tbody>
                 {prescriptions.map((p) => (
                   <tr key={p._id}>
+                    {/* Patient Name */}
                     <td>{p.patient?.name || "Unknown"}</td>
+
                     <td style={{ whiteSpace: "normal", maxWidth: "220px" }}>
-                      {p.medications?.map((m) => `${m.name} (${m.dosage})`).join(", ") || "N/A"}
+                      {p.medications
+                        ?.map((m) => `${m.name} (${m.dosage})`)
+                        .join(", ") || "N/A"}
                     </td>
+
                     <td>
-                      {p.createdAt
-                        ? new Date(p.createdAt).toLocaleDateString()
+                      {p.issuedAt
+                        ? new Date(p.issuedAt).toLocaleDateString("en-IN")
                         : "N/A"}
                     </td>
+
                     <td>
-                      {p.qrCode ? (
+                      {p.qrCodeImage ? (
                         <img
-                          src={p.qrCode}
-                          alt="QR Code"
-                          className="img-fluid"
-                          style={{ maxWidth: "70px", maxHeight: "70px" }}
+                          src={p.qrCodeImage}
+                          alt="QR"
+                          style={{ maxWidth: "70px" }}
+                          className="img-thumbnail"
                         />
                       ) : (
                         "Not Generated"
                       )}
                     </td>
+
                     <td>
                       <div className="d-flex flex-wrap justify-content-center gap-2">
                         <Link
@@ -101,11 +110,10 @@ export default function Prescriptions() {
                           View
                         </Link>
 
-                        {p.qrCode && (
+                        {p.qrCodeImage && (
                           <a
-                            href={p.qrCode}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={p.qrCodeImage}
+                            download={`prescription_${p._id}_qr.png`} // allows download
                             className="btn btn-sm btn-outline-success"
                           >
                             QR
@@ -113,10 +121,10 @@ export default function Prescriptions() {
                         )}
 
                         <a
-                          href={`/api/prescriptions/${p._id}/pdf`}
+                          href={`http://localhost:5000/api/prescriptions/${p._id}/pdf`}
+                          // ⚠️ Corrected
                           className="btn btn-sm btn-secondary"
                           target="_blank"
-                          rel="noopener noreferrer"
                         >
                           PDF
                         </a>

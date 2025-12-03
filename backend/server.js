@@ -34,6 +34,7 @@ app.use('/api/prescriptions', presRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use("/api/admin", adminRoutes);
 
+
 // 5️⃣ Default route
 app.get('/', (_, res) => res.send('HCMS2 API running'));
 

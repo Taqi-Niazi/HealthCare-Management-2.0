@@ -11,6 +11,9 @@ export default function AdminSidebar() {
         <li className="nav-item mb-2">
           <Link className="nav-link" to="/admin/create-doctor">👨‍⚕️ Create Doctor</Link>
         </li>
+        <li className="nav-item mb-2">
+          <Link className="nav-link" to="/admin/manage-doctors">🛠 Manage Doctors</Link>
+        </li>
       </ul>
     </div>
   );

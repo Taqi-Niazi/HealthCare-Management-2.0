@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
 
@@ -27,13 +27,13 @@ export default function Navbar() {
   };
 
   const navLinkClasses = ({ isActive }) =>
-    `nav-link ${isActive ? "fw-bold text-warning" : ""}`;
+    `nav-link px-3 ${isActive ? "fw-bold text-warning" : "text-light"}`;
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-4 shadow-sm">
-      <NavLink className="navbar-brand fw-bold" to="/">
-        HCMS 2.0
-      </NavLink>
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-4 shadow">
+      <Link className="navbar-brand fw-bold fs-4" to="/">
+        🏥 HCMS 2.0
+      </Link>
 
       <button
         className="navbar-toggler"
@@ -45,107 +45,68 @@ export default function Navbar() {
 
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav ms-auto align-items-center">
-          {/* Doctor Links */}
+
+          {/* Dynamic Links by Role */}
           {user?.role === "doctor" && (
             <>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/doctor/dashboard">
-                  Dashboard
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/doctor/appointments">
-                  Appointments
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/doctor/patients">
-                  Patients
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/doctor/prescriptions">
-                  Prescriptions
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  className={navLinkClasses}
-                  to="/doctor/create-prescription"
-                >
-                  Create Prescription
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/scan-prescription">
-                  Scan QR
-                </NavLink>
-              </li>
+              <NavItem to="/doctor/dashboard" label="Dashboard" />
+              <NavItem to="/doctor/appointments" label="Appointments" />
+              <NavItem to="/doctor/prescriptions" label="Prescriptions" />
+              <NavItem to="/doctor/create-prescription" label="Create Prescription" />
+              <NavItem to="/scan-prescription" label="Scan QR" />
             </>
           )}
 
-          {/* Patient Links */}
           {user?.role === "patient" && (
             <>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/patient/dashboard">
-                  Dashboard
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/patient/book-appointment">
-                  Book Appointment
-                </Link>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/patient/appointments">
-                  My Appointments
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/patient/prescriptions">
-                  My Prescriptions
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink className={navLinkClasses} to="/scan-prescription">
-                  Scan QR
-                </NavLink>
-              </li>
+              <NavItem to="/patient/dashboard" label="Dashboard" />
+              <NavItem to="/patient/book-appointment" label="Book Appointment" />
+              <NavItem to="/patient/appointments" label="My Appointments" />
+              <NavItem to="/patient/prescriptions" label="My Prescriptions" />
             </>
           )}
 
-          {/* Admin links */}
           {user?.role === "admin" && (
             <>
-              <li className="nav-item">
-                <Link className="nav-link" to="/admin/dashboard">
-                  Admin Dashboard
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/admin/manage-doctors">
-                  Manage Doctors
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/admin/create-doctor">
-                  Create Doctor
-                </Link>
-              </li>
+              <NavItem to="/admin/dashboard" label="Admin Dashboard" />
+              <NavItem to="/admin/manage-doctors" label="Manage Doctors" />
+              <NavItem to="/admin/create-doctor" label="Create Doctor" />
             </>
           )}
 
-          {/* Logout Button */}
+          {/* Right-side Profile Info */}
           {user && (
-            <li className="nav-item ms-3">
-              <button className="btn btn-sm btn-light" onClick={handleLogout}>
-                Logout
+            <li className="nav-item dropdown ms-3">
+              <button
+                className="btn btn-sm btn-light dropdown-toggle"
+                data-bs-toggle="dropdown"
+              >
+                {user.name} <span className="badge bg-secondary">{user.role}</span>
               </button>
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li>
+                  <button className="dropdown-item" onClick={handleLogout}>
+                    Logout
+                  </button>
+                </li>
+              </ul>
             </li>
           )}
         </ul>
       </div>
     </nav>
+  );
+}
+
+function NavItem({ to, label }) {
+  return (
+    <li className="nav-item">
+      <NavLink className={({ isActive }) => 
+        `nav-link px-3 ${isActive ? "fw-bold text-warning" : "text-light"}`} 
+        to={to}
+      >
+        {label}
+      </NavLink>
+    </li>
   );
 }

@@ -1,0 +1,47 @@
+/* UNIVERSAL FULL PAGE LAYOUT (Admin & Doctor) */
+html, body {
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+.layout-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar-wrapper {
+  width: 250px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #ddd;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+/* Content area */
+.content-wrapper {
+  flex-grow: 1;
+  margin-left: 250px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Limit width & center real content */
+.content-inner {
+  width: 100%;
+  max-width: 900px;
+  text-align: center;
+}
+
+/* Footer fix */
+footer {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+  padding: 15px 0;
+  background-color: #222;
+  color: white;
+}
